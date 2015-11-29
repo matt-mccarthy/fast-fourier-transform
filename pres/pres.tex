@@ -10,6 +10,9 @@
 \usepackage{algorithm}
 
 \def\ft{\mathcal{F}}
+\algblockdefx[spawn]{Spawn}{EndSpawn}
+[1]{\textbf{spawn process for} #1 \textbf{do}}
+{\textbf{end spawn}}
 
 \begin{document}
 
@@ -46,7 +49,7 @@
 		with $\omega=e^{2\pi i/n}$.
 		Furthermore, we denote $\mathbf{Y}=\ft(\mathbf{X})$.
 	\end{definition}
-	\pause{}
+	%\pause{}
 	Complexity: $\Theta(n^2)$.
 \end{frame}
 
@@ -58,7 +61,7 @@
 		&= \sum_{k=0}^{n/2-1}x_{2k} e^{2(2\pi i/n)jk} + \sum_{k=0}^{n/2-1}x_{2k+1}\omega^{j}e^{2(2\pi i/n)jk}\\
 		&= \sum_{k=0}^{n/2-1}x_{2k} \paren{e^{2\pi i/n}}^{2jk} + \omega^{j}\sum_{k=0}^{n/2-1}x_{2k+1}\paren{e^{2\pi i/n}}^{2jk}
 	\end{align*}
-	\pause{}
+	%\pause{}
 	Let $\tilde{\omega}=\omega^2$ and we have
 	\[
 		y_j = \sum_{k=0}^{n/2-1}x_{2k} {\tilde{\omega}}^{jk} + \omega^{j}\sum_{k=0}^{n/2-1}x_{2k+1}{\tilde{\omega}}^{jk}.
@@ -70,7 +73,7 @@
 
 	If $n=2^k$ for some $k\in\ZZ^+$, then we can iterate this process using the following algorithm.
 
-	\pause
+	%\pause
 	The one-dimensional, unordered, radix 2, FFT algorithm.
 	\begin{algorithmic}[1]
 		\Function{R-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$,$\omega$}
@@ -119,6 +122,133 @@
 			\State $\mathbf{Y}:=\mathbf{R}$
 		\EndFunction
 	\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Pseudocode}
+
+	\begin{algorithmic}[1]
+		\Function{I-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+			\State $t:=\lg n$
+			\State $\mathbf{R}=\mathbf{X}$
+			\Spawn{$l=0$ to $n-1$}
+				\For{$m=0$ to $t-1$}
+					\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $l$
+					\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+					\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+					\State $(s_j,s_k)\gets$\Call{Request}{$j$,$k$}
+					\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+				\EndFor
+			\EndSpawn
+			\State \textbf{join all}
+			\State $\mathbf{Y}:=\mathbf{R}$
+		\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Assumptions}
+
+	\begin{itemize}
+		\item We need a bisection width of $\Theta(p)$ for $p$ processors.
+		\item We have $p$ processors on a $\lg p$ dimensional hypercube.
+		\begin{itemize}
+			\item Analysis applicable to any network with $O(p)$ bandwidth.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: One Task per Process}
+
+	\begin{itemize}
+		\item Output based decomposition
+		\begin{itemize}
+			\item Create $n$ tasks, task $l$ generates $y_l$
+			\item Load $x_l$ into task $l$
+			\item Map each task to a unique process ($n=p$)
+		\end{itemize}
+		\item Each process executes lines 7 to 10 of the iterative formulation
+		\begin{itemize}
+			\item Each process does this $\lg n$ times
+		\end{itemize}
+		\item To execute line 10, each process needs an element of $\mathbf{S}$ that differs from $l$ only by one bit.
+		\item At iteration $m$, each process communicates with the process whose label differs from it at $m$th bit.
+		\item Each iteration has one addition, multiplication, and exchange
+		\item Ergo $T_p = \Theta(\lg n)$ and $C=pT_p=\Theta(n\lg n)$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Multiple Tasks per Process}
+
+	\begin{algorithmic}[1]
+		\Function{I-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+			\State $t:=\lg n$, $BLK:=n/p$
+			\State $\mathbf{R}=\mathbf{X}$
+			\Spawn{$l=0$ to $BLK-1$}
+				\For{$c=l\cdot BLK$, to $l\cdot(BLK+1)$}
+					\For{$m=0$ to $t-1$}
+						\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $c$
+						\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+						\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+						\State $(s_j,s_k)\gets$\Call{Request}{$j$,$k$}
+						\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+					\EndFor
+				\EndFor
+			\EndSpawn
+			\State \textbf{join all}
+			\State $\mathbf{Y}:=\mathbf{R}$
+		\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Analysis 2}
+
+	\begin{itemize}
+		\item Assume both $n=2^t$ and $p=2^d$
+		\item Same procedure as previous analysis
+		\item However, interprocessor communication happpens on first $d$ steps, and not at all on the remaining steps
+		\item Communication cost:
+		\[
+			t_s\lg p+ t_w\frac{n}{p}\lg p
+		\]
+		\item Computation cost:
+		\[
+			t_c\frac{n}{p}\lg n
+		\]
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Analysis 2}
+
+	\begin{itemize}
+		\item Total runtime:
+		\[
+			T_p = t_c\frac{n}{p}\lg n + t_s\lg p+ t_w\frac{n}{p}\lg p
+		\]
+		\item Cost:
+		\[
+			C=pT_p=t_c n\lg n +t_s \lg p +t_w n\lg p
+		\]
+		\item Cost optimal for all $p\leq n$ ($C=O(n\lg n)$)
+		\item Speedup:
+		\[
+			S=\frac{pn\lg n}{n\lg n+(t_s/t_c)p\lg p+(t_w/t_c)n\lg p}
+		\]
+		\item Efficiency:
+		\[
+			E=\paren{1+\frac{t_sp\lg p}{t_c n\lg n}+\frac{t_w\lg p}{t_c\lg n}}^{-1}
+		\]
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Mesh Analysis}
+
+	
 \end{frame}
 
 \begin{frame}[allowframebreaks]
