@@ -1,0 +1,122 @@
+\documentclass[xcolor=pdftex,dvipsnames,table]{presentation}
+	\usetheme{Warsaw}
+	\usecolortheme[RGB={100,0,0}]{structure}
+%	\usefonttheme{structurebold}
+%	\useoutertheme{smoothbars}
+	\useinnertheme{rounded}
+
+\usepackage{algpseudocode}
+\usepackage[]{algorithmicx}
+\usepackage{algorithm}
+
+\def\ft{\mathcal{F}}
+
+\begin{document}
+
+\title[Fast Fourier Transform]
+{
+	Fast Fourier Transform
+}
+%\subtitle{Text Here}
+\author[McCarthy]
+{
+	Matt McCarthy
+}
+\institute[CNU]
+{
+	Christopher Newport University
+}
+\date[]
+{
+	CPSC 621\\
+	November 30, 2015
+}
+
+\frame{\titlepage}
+
+\begin{frame}
+	\frametitle{Discrete Fourier Transform}
+
+	\begin{definition}[Discrete Fourier Transform]
+		Let $\mathbf{X}=\paren{x_0,x_1,\ldots,x_{n-1}}\in\CC^n$.
+		Then the \textit{Discrete Fourier Transform of $\mathbf{X}$} is defined as $\mathbf{Y}=\paren{y_0,y_1,\ldots,y_{n-1}}$ where
+		\[
+			y_j:=\sum_{k=0}^{n-1}x_k \omega^{jk}
+		\]
+		with $\omega=e^{2\pi i/n}$.
+		Furthermore, we denote $\mathbf{Y}=\ft(\mathbf{X})$.
+	\end{definition}
+	\pause{}
+	Complexity: $\Theta(n^2)$.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Slightly Faster Fourier Transform}
+	If we assume $n$ is even, then by symbol pushing we get
+	\begin{align*}
+		y_j &=\sum_{k=0}^{n/2-1}x_{2k} \omega^{(2k)j} + \sum_{k=0}^{n/2-1}x_{2k+1}\omega^{(2k+1)j}\\
+		&= \sum_{k=0}^{n/2-1}x_{2k} e^{2(2\pi i/n)jk} + \sum_{k=0}^{n/2-1}x_{2k+1}\omega^{j}e^{2(2\pi i/n)jk}\\
+		&= \sum_{k=0}^{n/2-1}x_{2k} \paren{e^{2\pi i/n}}^{2jk} + \omega^{j}\sum_{k=0}^{n/2-1}x_{2k+1}\paren{e^{2\pi i/n}}^{2jk}
+	\end{align*}
+	\pause{}
+	Let $\tilde{\omega}=\omega^2$ and we have
+	\[
+		y_j = \sum_{k=0}^{n/2-1}x_{2k} {\tilde{\omega}}^{jk} + \omega^{j}\sum_{k=0}^{n/2-1}x_{2k+1}{\tilde{\omega}}^{jk}.
+	\]
+\end{frame}
+
+\begin{frame}
+	\frametitle{Fast Fourier Transform}
+
+	If $n=2^k$ for some $k\in\ZZ^+$, then we can iterate this process using the following algorithm.
+
+	\pause
+	The one-dimensional, unordered, radix 2, FFT algorithm.
+	\begin{algorithmic}[1]
+		\Function{R-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$,$\omega$}
+			\If{$n$=1}
+				\State $y_0=x_0$
+			\Else
+				\State Let $\mathbf{Q}=\mathbf{0},\mathbf{T}=\mathbf{0}\in\CC^n$
+				\State \Call{R-FFT}{$(x_0,x_2,\ldots,x_{n-2})$,$(q_0,q_2,\ldots,q_{n-2})$,$n/2$,$\omega^2$}
+				\State \Call{R-FFT}{$(x_1,x_3,\ldots,x_{n-1})$,$(t_1,t_3,\ldots,t_{n-1})$,$n/2$,$\omega^2$}
+				\ForAll{$j\in\set{0,1,\ldots,n-1}$}
+					\State $y_j=q_{j\mod{n/2}}+\omega^i t_{j\mod{n/2}}$
+				\EndFor
+			\EndIf
+		\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Fast Fourier Transform: Serial Analysis}
+
+	\begin{itemize}
+		\item Since $n=2^k$, we do $\lg n=k$ steps
+		\item At the $m$th level of recursion we do $2^m$ FFTs of size $n/2^m$
+		\begin{itemize}
+			\item Each level is $\Theta(n)$
+		\end{itemize}
+		\item Thus, FFT is $\Theta(n\lg n)$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\frametitle{References}
+	\begin{thebibliography}{10}
+		\bibitem{label}
+		Author
+		\newblock{} Title
+		\newblock{} where
+	\end{thebibliography}
+\end{frame}
+
+\begin{frame}
+\begin{Large}
+\begin{center}
+Thank you!
+\end{center}
+\end{Large}
+\end{frame}
+
+\end{document}
