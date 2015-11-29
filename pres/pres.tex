@@ -101,6 +101,26 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\frametitle{Iterative Formulation}
+	\begin{algorithmic}[1]
+		\Function{I-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+			\State $t:=\lg n$
+			\State $\mathbf{R}=\mathbf{X}$
+			\For{$m=0$ to $t-1$}
+				\State $\mathbf{S}=\mathbf{R}$
+				\For{$l=0$ to $n-1$}
+					\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $l$
+					\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+					\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+					\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+				\EndFor
+			\EndFor
+			\State $\mathbf{Y}:=\mathbf{R}$
+		\EndFunction
+	\end{algorithmic}
+\end{frame}
+
 \begin{frame}[allowframebreaks]
 \frametitle{References}
 	\begin{thebibliography}{10}
