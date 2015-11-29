@@ -248,25 +248,89 @@
 \begin{frame}
 	\frametitle{Binary-Exchange Algorithm: Mesh Analysis}
 
-	
+	\begin{itemize}
+		\item Computation cost remains the same.
+		\[
+			t_c\frac{n}{p}\lg n
+		\]
+		\item Row/Column Communication cost:
+		\[
+			\sum_{m=0}^{d/2-1} t_s+t_w\frac{n}{p}2^m
+		\]
+		\item Total runtime:
+		\[
+			T_p \approx t_c\frac{n}{p}\lg n+ t_s\lg p +2t_w\frac{n}{\sqrt{p}}
+		\]
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Mesh Analysis}
+
+	\begin{itemize}
+		\item Speedup
+		\[
+			S\approx \frac{pn\lg n}{n\lg n+(t_s/t_c)p\lg p + 2(t_w/t_c)n\sqrt{p}}
+		\]
+		\item Efficiency
+		\[
+			E\approx \paren{1+\frac{t_s p\lg p}{t_c n\lg n}+\frac{2t_w\sqrt{p}}{t_c\lg n}}^{-1}
+		\]
+		\item Cost
+		\[
+			C=pT_p\approx t_c n\lg n+ t_s p\lg p +2t_w n\sqrt{p}
+		\]
+		\item Cost optimal iff $\sqrt{p}=O(\lg n)$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Binary-Exchange Algorithm: Duplicated Work}
+
+	\begin{algorithmic}[1]
+		\Function{I-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+			\State $t:=\lg n$, $BLK:=n/p$
+			\State $\mathbf{R}=\mathbf{X}$
+			\Spawn{$l=0$ to $BLK-1$}
+				\For{$c=l\cdot BLK$, to $l\cdot(BLK+1)$}
+					\For{$m=0$ to $t-1$}
+						\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $c$
+						\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+						\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+						\State $(s_j,s_k)\gets$\Call{Request}{$j$,$k$}
+						\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+					\EndFor
+				\EndFor
+			\EndSpawn
+			\State \textbf{join all}
+			\State $\mathbf{Y}:=\mathbf{R}$
+		\EndFunction
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Extra Notes}
+
+	\begin{itemize}
+		\item Two dimensional transpose algorithm
+		\begin{itemize}
+			\item Uses matrix transposition to do FFT
+			\item Total exchange
+			\item Works for low-bandwidth situations
+			\item Cost optimal iff $n\lg n = \Omega(p^2\lg p)$
+			\item Preffered over binary-exchange if $t_s$ is small
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}[allowframebreaks]
 \frametitle{References}
 	\begin{thebibliography}{10}
-		\bibitem{label}
-		Author
-		\newblock{} Title
-		\newblock{} where
+		\bibitem{par-book}
+		Grama et. al.
+		\newblock{} Introduction to Parallel Computing.
+		\newblock{} Pearson Education.
 	\end{thebibliography}
-\end{frame}
-
-\begin{frame}
-\begin{Large}
-\begin{center}
-Thank you!
-\end{center}
-\end{Large}
 \end{frame}
 
 \end{document}
