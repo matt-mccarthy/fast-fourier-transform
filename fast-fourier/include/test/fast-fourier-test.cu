@@ -22,6 +22,7 @@ class fft_test : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 	protected:
+		__host__
 		void test_dft1()
 		{
 			int n(4);

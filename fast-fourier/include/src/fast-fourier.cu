@@ -1,16 +1,20 @@
-#include <algorithm>
-
+#include <thrust/fill.h>
+#include <thrust/copy.h>
 #include <math_constants.h>
 #include <math_functions.h>
 
 #include "../fast-fourier.h"
 
-using std::copy;
-using std::fill_n;
+using thrust::copy_n;
+using thrust::fill_n;
 
+__host__ __device__
 void			binary_inc(bool* i, int lg_n);
+__host__ __device__
 int				bin2dec(const bool* i, int lg_n);
+__host__ __device__
 int				wierd_bin_thingy(const bool* l, int lg_n, int m);
+__host__ __device__
 cuFloatComplex	k_root_unity(int k, int n);
 
 cuFloatComplex* fast_fourier::discrete_fourier_transform(cuFloatComplex* x,
@@ -44,7 +48,8 @@ cuFloatComplex* fast_fourier::fast_fourier_transform(cuFloatComplex* x,
 	bool*			l_bi(new bool[lg_n]);
 	bool			tmp(false);
 
-	copy(x, x + n, r);
+	for (int j(0) ; j < n ; j++)
+		r[j] = x[j];
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
