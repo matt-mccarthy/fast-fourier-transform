@@ -8,6 +8,7 @@ namespace fast_fourier
 	cuFloatComplex* fast_fourier_transform(cuFloatComplex* x, unsigned n);
 	cuFloatComplex* fast_fourier_transform(cuFloatComplex* x, unsigned n,
 											unsigned p);
+	cuFloatComplex* discrete_fourier_transform(cuFloatComplex* x, unsigned n);
 }
 
 #endif

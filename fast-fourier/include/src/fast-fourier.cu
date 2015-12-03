@@ -13,6 +13,20 @@ int				bin2dec(const bool* i, int lg_n);
 int				wierd_bin_thingy(const bool* l, int lg_n, int m);
 cuFloatComplex	k_root_unity(int k, int n);
 
+cuFloatComplex* fast_fourier::discrete_fourier_transform(cuFloatComplex* x,
+															unsigned n)
+{
+	cuFloatComplex* y(new cuFloatComplex[n]);
+
+	fill_n(y, n, make_cuFloatComplex(0.0f,0.0f));
+
+	for (int j(0) ; j < n ; j++)
+		for (int k(0) ; k < n ; k++)
+			y[j] = cuCaddf( y[j], cuCmulf(x[k], k_root_unity(k*j, n)) );
+
+	return y;
+}
+
 cuFloatComplex* fast_fourier::fast_fourier_transform(cuFloatComplex* x,
 														unsigned n, unsigned p)
 {
