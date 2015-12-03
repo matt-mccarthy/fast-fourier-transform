@@ -9,18 +9,17 @@ using thrust::copy_n;
 using thrust::fill_n;
 
 __host__ __device__
-void			binary_inc(bool* i, int lg_n);
+void	binary_inc(bool* i, int lg_n);
 __host__ __device__
-int				bin2dec(const bool* i, int lg_n);
+int		bin2dec(const bool* i, int lg_n);
 __host__ __device__
-int				wierd_bin_thingy(const bool* l, int lg_n, int m);
+int		wierd_bin_thingy(const bool* l, int lg_n, int m);
 __host__ __device__
-cuFloatComplex	k_root_unity(int k, int n);
+cfloat	k_root_unity(int k, int n);
 
-cuFloatComplex* fast_fourier::discrete_fourier_transform(cuFloatComplex* x,
-															unsigned n)
+cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 {
-	cuFloatComplex* y(new cuFloatComplex[n]);
+	cfloat* y(new cfloat[n]);
 
 	fill_n(y, n, make_cuFloatComplex(0.0f,0.0f));
 
