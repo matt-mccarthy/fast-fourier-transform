@@ -127,3 +127,4 @@ sympy-plots-for-*.tex/
 
 # C++
 *.o
+a.out
