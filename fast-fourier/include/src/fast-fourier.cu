@@ -5,7 +5,7 @@
 
 #include "../fast-fourier.h"
 
-using std::copy_n;
+using std::copy;
 using std::fill_n;
 
 void			binary_inc(bool* i, int lg_n);
@@ -17,7 +17,7 @@ cuFloatComplex* fast_fourier::fast_fourier_transform(cuFloatComplex* x,
 														unsigned n, unsigned p)
 {
 	cuFloatComplex* y(new cuFloatComplex[n]);
-	return nullptr;
+	return y;
 }
 
 cuFloatComplex* fast_fourier::fast_fourier_transform(cuFloatComplex* x,
@@ -30,7 +30,7 @@ cuFloatComplex* fast_fourier::fast_fourier_transform(cuFloatComplex* x,
 	bool*			l_bi(new bool[lg_n]);
 	bool			tmp(false);
 
-	copy_n(x, n, r);
+	copy(x, x + n, r);
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
