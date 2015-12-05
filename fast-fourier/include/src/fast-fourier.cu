@@ -104,9 +104,9 @@ int bin2dec(const bool* i, int lg_n)
 
 	for (int j(lg_n - 1) ; j > -1 ; j--)
 	{
-		two_j = (int)exp2f(lg_n - 1 - j);
+		//two_j = (int)exp2f(lg_n - 1 - j);
 		m += (int)i[j] * two_j;
-		//two_j *= 2;
+		two_j *= 2;
 	}
 
 	return m;
@@ -118,26 +118,14 @@ int wierd_bin_thingy(const bool* l, int lg_n, int m)
 
 	for (int j(0) ; j < m + 1 ; j++)
 	{
-		exponent += l[j] * two_j;
-		two_j *= 2;
+		exponent	+= l[j] * two_j;
+		two_j		*= 2;
 	}
-	
-	for (int j(m) ; j < lg_n ; j++)
-		exponent *= 2;
-
-	//return exponent;
-
-	bool e[lg_n];
-
-	for (int j(m) ; j > -1 ; j--)
-		e[m - j] = l[j];
 
 	for (int j(m + 1) ; j < lg_n ; j++)
-		e[j] = 0;
+		exponent	*= 2;
 
-	cout << exponent << "\t" << bin2dec(e, lg_n) << endl;
-
-	return bin2dec(e, lg_n);
+	return exponent;
 }
 
 cfloat	k_root_unity(int k, int n)
