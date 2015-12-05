@@ -13,7 +13,7 @@ int main()
 	cfloat*	actual		= fast_fourier_transform(input, 8);
 
 	for (int j(0) ; j < 8 ; j++)
-		cout << actual[j] << "\t" << expected[j] << endl;
+		cout << actual[j] << "\t\t\t\t" << expected[j] << endl;
 
 	delete[] actual;
 

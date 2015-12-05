@@ -15,24 +15,24 @@ using thrust::fill_n;
 
 using fast_fourier::cfloat;
 
-__host__// __device__
+__host__ __device__
 void	binary_inc(bool* i, int lg_n);
-__host__// __device__
+__host__ __device__
 int		bin2dec(const bool* i, int lg_n);
-__host__// __device__
+__host__ __device__
 int		wierd_bin_thingy(const bool* l, int lg_n, int m);
-__host__// __device__
+__host__ __device__
 cfloat	k_root_unity(int k, int n);
 
 cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 {
 	cfloat* y(new cfloat[n]);
 
-	fill_n(y, n, cfloat(0.0f,0.0f));
+	fill_n(y, n, cfloat(0.0));
 
 	for (int j(0) ; j < n ; j++)
 		for (int k(0) ; k < n ; k++)
-			y[j] = y[j] + x[k] * k_root_unity(k*j, n);
+			y[j] += x[k] * k_root_unity(k*j, n);
 
 	return y;
 }
@@ -55,13 +55,13 @@ cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n)
 	for (int j(0) ; j < n ; j++)
 		r[j] = x[j];
 
+	fill_n(l_bi, lg_n, false);
+
 	for (int m(0) ; m < lg_n ; m++)
 	{
 		delete[] s;
 		s = r;
 		r = new cfloat[n];
-
-		fill_n(l_bi, lg_n, false);
 
 		for (int l(0) ; l < n ; l++)
 		{
@@ -69,9 +69,7 @@ cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n)
 			l_bi[m] = false;
 
 			j = bin2dec(l_bi, lg_n);
-			l_bi[m] = true;
-			//k = j + (int)exp2f(m);
-			k = bin2dec(l_bi, lg_n);
+			k = j + (int)exp2f(lg_n - m - 1);
 
 			l_bi[m] = tmp;
 
@@ -104,7 +102,6 @@ int bin2dec(const bool* i, int lg_n)
 
 	for (int j(lg_n - 1) ; j > -1 ; j--)
 	{
-		//two_j = (int)exp2f(lg_n - 1 - j);
 		m += (int)i[j] * two_j;
 		two_j *= 2;
 	}
