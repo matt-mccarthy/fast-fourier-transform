@@ -116,14 +116,14 @@ int wierd_bin_thingy(const bool* l, int lg_n, int m)
 {
 	int exponent(0), two_j(1);
 
-	for (int j(m + 1) ; j < lg_n ; j++)
-		exponent *= 2;
-
-	for (int j(m) ; j > -1 ; j--)
+	for (int j(0) ; j < m + 1 ; j++)
 	{
-		exponent += two_j * l[j];
+		exponent += l[j] * two_j;
 		two_j *= 2;
 	}
+	
+	for (int j(m) ; j < lg_n ; j++)
+		exponent *= 2;
 
 	//return exponent;
 
