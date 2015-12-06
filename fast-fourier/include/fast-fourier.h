@@ -9,8 +9,8 @@ namespace fast_fourier
 
 	__host__ __device__
 	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n);
-	__host__ __device__
-	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, unsigned p);
+	__global__
+	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, int blk_count, int thd_count);
 	__host__ __device__
 	cfloat* discrete_fourier_transform(cfloat* x, unsigned n);
 }
