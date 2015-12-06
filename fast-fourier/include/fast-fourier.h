@@ -13,8 +13,6 @@ namespace fast_fourier
 	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, unsigned p);
 	__host__ __device__
 	cfloat* discrete_fourier_transform(cfloat* x, unsigned n);
-	__host__
-	void	test();
 }
 
 #endif

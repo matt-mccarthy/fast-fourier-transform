@@ -5,10 +5,6 @@
 
 #include "../fast-fourier.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
 using thrust::copy_n;
 using thrust::exp;
 using thrust::fill_n;
@@ -82,6 +78,8 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 
 	for (int j(0) ; j < n ; j++)
 		y[j] = r[j];
+
+	delete[] r, s, l_bi;
 }
 
 void binary_inc(bool* i, int lg_n)
@@ -126,29 +124,8 @@ int wierd_bin_thingy(const bool* l, int lg_n, int m)
 
 cfloat	k_root_unity(int k, int n)
 {
-	float exponent(2.0f * k * CUDART_PI_F /((float) n));
+	float	e_img(2.0f * ((float)k) * CUDART_PI_F /((float) n));
+	cfloat	exponent(cfloat(0,e_img));
 
-	return exp(cfloat(0, exponent));
-}
-
-void fast_fourier::test()
-{
-	cout << "bininc" << endl;
-
-	bool*	l_bi(new bool[4]);
-	fill_n(l_bi, 4, false);
-
-	for (int j(0) ; j < 16 ; j++)
-	{
-		for (int k(0) ; k < 4 ; k++)
-			cout << l_bi[k];
-
-		cout << "\t" << bin2dec(l_bi, 4) << endl;
-
-		binary_inc(l_bi, 4);
-	}
-
-	for (int k(0) ; k < 4 ; k++)
-		cout << l_bi[k];
-	cout << "\t" << bin2dec(l_bi, 4) << endl;
+	return exp(exponent);
 }
