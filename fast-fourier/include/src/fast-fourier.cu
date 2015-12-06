@@ -51,7 +51,8 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 	for (int j(0) ; j < n ; j++)
 		r[j] = x[j];
 
-	fill_n(l_bi, lg_n, false);
+	for (int j(0) ; j < lg_n ; j++ )
+		l_bi[j] = false;
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
