@@ -5,12 +5,12 @@
 
 namespace fast_fourier
 {
-	typedef thrust::complex<double> cfloat;
+	typedef thrust::complex<float> cfloat;
 
 	__host__ __device__
-	cfloat* fast_fourier_transform(cfloat* x, unsigned n);
+	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n);
 	__host__ __device__
-	cfloat* fast_fourier_transform(cfloat* x, unsigned n, unsigned p);
+	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, unsigned p);
 	__host__ __device__
 	cfloat* discrete_fourier_transform(cfloat* x, unsigned n);
 	__host__

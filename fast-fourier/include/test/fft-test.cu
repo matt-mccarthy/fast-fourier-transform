@@ -10,7 +10,9 @@ int main()
 {
 	cfloat	input[]		= {1,2,3,4,5,6,7,8};
 	cfloat*	expected	= discrete_fourier_transform(input, 8);
-	cfloat*	actual		= fast_fourier_transform(input, 8);
+	cfloat*	actual		= new cfloat[8];
+
+	fast_fourier_transform(input, actual, 8);
 
 	for (int j(0) ; j < 8 ; j++)
 		cout << actual[j] << "\t\t\t\t" << expected[j] << endl;

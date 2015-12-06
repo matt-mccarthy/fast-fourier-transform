@@ -7,14 +7,9 @@ using namespace std;
 using namespace fast_fourier;
 
 __global__
-void run_test(cfloat* input, cfloat* output, int n)
+void run_test(cfloat*& input, cfloat*& output, int n)
 {
-	cfloat* tmp(fast_fourier_transform(input, n));
-
-	for (int j(0) ; j < n ; j++)
-		output[j] = tmp[j];
-
-	delete[] tmp;
+	fast_fourier_transform(input, output, n);
 }
 
 int main()
@@ -39,6 +34,7 @@ int main()
 		cout << "Input failed to copy" << endl;
 		return 1;
 	}
+
 	run_test<<<1,1>>>(d_input, d_actual, 8);
 
 	actual		= new cfloat[8];
@@ -47,11 +43,8 @@ int main()
 	for (int j(0) ; j < 8 ; j++)
 		cout << actual[j] << "\t\t\t\t" << expected[j] << endl;
 
-	cout << "a" << endl;
 	delete[] actual;
-	cout << "b" << endl;
-	delete[] d_actual;
-	cout << "c" << endl;
+	cudaFree( d_actual );
 	cudaFree( d_input );
 
 	return 0;

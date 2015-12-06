@@ -28,7 +28,7 @@ cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 {
 	cfloat* y(new cfloat[n]);
 
-	fill_n(y, n, cfloat(0.0));
+	fill_n(y, n, cfloat(0.0f));
 
 	for (int j(0) ; j < n ; j++)
 		for (int k(0) ; k < n ; k++)
@@ -37,16 +37,16 @@ cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 	return y;
 }
 
-cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n, unsigned p)
+void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, unsigned p)
 {
-	cfloat* y(new cfloat[n]);
-	return y;
+
 }
 
-cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n)
+void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 {
-	cfloat*	s(new cfloat[1]);
+	cfloat*	s(new cfloat[n]);
 	cfloat*	r(new cfloat[n]);
+	cfloat*	tmp_ptr;
 	int		lg_n(ilogbf(n));
 	int		j,k,u_exp;
 	bool*	l_bi(new bool[lg_n]);
@@ -59,9 +59,9 @@ cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n)
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
-		delete[] s;
+		tmp_ptr = s;
 		s = r;
-		r = new cfloat[n];
+		r = tmp_ptr;
 
 		for (int l(0) ; l < n ; l++)
 		{
@@ -80,9 +80,8 @@ cfloat* fast_fourier::fast_fourier_transform(cfloat* x, unsigned n)
 		}
 	}
 
-	delete[] s;
-
-	return r;
+	for (int j(0) ; j < n ; j++)
+		y[j] = r[j];
 }
 
 void binary_inc(bool* i, int lg_n)
@@ -127,7 +126,7 @@ int wierd_bin_thingy(const bool* l, int lg_n, int m)
 
 cfloat	k_root_unity(int k, int n)
 {
-	double exponent(2.0 * k * CUDART_PI /((double) n));
+	float exponent(2.0f * k * CUDART_PI_F /((float) n));
 
 	return exp(cfloat(0, exponent));
 }
