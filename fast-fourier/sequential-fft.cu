@@ -67,10 +67,11 @@ int main(int argc, char** argv)
 		gen_array(input, n);
 
 		// Copy the input array to the GPU
-		if (cudaMemcpy( d_input, input, sizeof(cfloat) * n, cudaMemcpyHostToDevice ) != cudaSuccess)
+		if (cudaMemcpy( d_input, input, (long) n * sizeof(cfloat), cudaMemcpyHostToDevice ) != cudaSuccess)
 		{
 			auto t = cudaGetLastError();
-			cout << "Input failed to copy: "
+			cout << "Iteration: " << j
+				<< " Input failed to copy: "
 				<< cudaGetErrorName(t) << ", "
 				<< cudaGetErrorString(t) << endl;
 			return 1;
@@ -79,6 +80,7 @@ int main(int argc, char** argv)
 		// Run the test
 		tp1 = system_clock::now();
 		run_test<<<1,1>>>(d_input, d_output, n);
+		cudaDeviceSynchronize();
 		tp2 = system_clock::now();
 
 		time_span	= duration_cast< duration<long double> >(tp2 - tp1)*1000.0;

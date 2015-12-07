@@ -103,6 +103,7 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 
 	// Copy x into r
 	parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
+	cudaDeviceSynchronize();
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
@@ -118,6 +119,7 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 
 	// Copy r into y
 	parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
+	cudaDeviceSynchronize();
 
 	delete[] r, s;
 }
