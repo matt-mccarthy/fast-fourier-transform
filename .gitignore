@@ -129,3 +129,5 @@ sympy-plots-for-*.tex/
 *.o
 a.out
 *.gch
+parallel-fft
+sequential-fft

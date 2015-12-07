@@ -1,4 +1,4 @@
-// Compiles with nvcc -std=c++11 -rdc=true -arch=compute_52 -code=sm_52
+// Compiles with nvcc -std=c++11 -rdc=true -arch=compute_50 -code=sm_50
 #include <thrust/fill.h>
 #include <thrust/copy.h>
 #include <math_constants.h>
@@ -102,13 +102,11 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	cfloat*	tmp_ptr;
 
 	// Copy x into r
-	// for (int l(0) ; l < n ; l++)
-	// 	r[l] = x[l];
 	parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
-		// Swap s and r
+		// Swap s and r so the last output becomes the new input
 		tmp_ptr = r;
 		r		= s;
 		s		= tmp_ptr;
@@ -119,8 +117,6 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	}
 
 	// Copy r into y
-	// for (int l(0) ; l < n ; l++)
-	// 	y[l] = r[l];
 	parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
 
 	delete[] r, s;
