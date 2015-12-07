@@ -1,3 +1,4 @@
+// Compiles with nvcc -std=c++11 -rdc=true -arch=compute_52 -code=sm_52
 #include <thrust/fill.h>
 #include <thrust/copy.h>
 #include <math_constants.h>
@@ -25,6 +26,9 @@ cfloat	k_root_unity(int k, int n);
 __global__
 void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
 					unsigned thd_off, unsigned n, int m);
+__global__
+void parallel_copy(const cfloat* src, cfloat* dst, unsigned n, unsigned blk_off,
+					unsigned thd_off);
 
 cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 {
@@ -98,8 +102,9 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	cfloat*	tmp_ptr;
 
 	// Copy x into r
-	for (int l(0) ; l < n ; l++)
-		r[l] = x[l];
+	// for (int l(0) ; l < n ; l++)
+	// 	r[l] = x[l];
+	parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
@@ -114,8 +119,9 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	}
 
 	// Copy r into y
-	for (int l(0) ; l < n ; l++)
-		y[l] = r[l];
+	// for (int l(0) ; l < n ; l++)
+	// 	y[l] = r[l];
+	parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
 
 	delete[] r, s;
 }
@@ -149,6 +155,17 @@ void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
 	}
 
 	delete[] l_bi;
+}
+
+__global__
+void parallel_copy(const cfloat* src, cfloat* dst, unsigned n, unsigned blk_off,
+					unsigned thd_off)
+{
+	int		l_min( blockIdx.x * blk_off + threadIdx.x * thd_off );
+	int		l_max( l_min + thd_off );
+
+	for (int l(l_min) ; l < l_max ; l++)
+		dst[l] = src[l];
 }
 
 void binary_inc(bool* i, int lg_n)
