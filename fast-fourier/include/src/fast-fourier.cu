@@ -89,14 +89,15 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 											int blk_count, int thd_count)
 {
 	int		lg_n(ilogbf(n));
-	cfloat*	tmp_ptr;
 
 	int		blk_off = n / blk_count;
 	int		thd_off	= blk_off / thd_count;
 
 	cfloat* r(new cfloat[n]);
 	cfloat* s(new cfloat[n]);
+	cfloat*	tmp_ptr;
 
+	// Copy x into r
 	for (int l(0) ; l < n ; l++)
 		r[l] = x[l];
 
@@ -109,8 +110,10 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 
 		// Perform the next step of the transform
 		transformer<<<blk_count, thd_count>>>(r, s, lg_n, blk_off, thd_off, n, m);
+		cudaDeviceSynchronize();
 	}
 
+	// Copy r into y
 	for (int l(0) ; l < n ; l++)
 		y[l] = r[l];
 
@@ -144,6 +147,8 @@ void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
 
 		binary_inc(l_bi, lg_n);
 	}
+
+	delete[] l_bi;
 }
 
 void binary_inc(bool* i, int lg_n)
