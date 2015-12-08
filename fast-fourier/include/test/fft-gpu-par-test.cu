@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <math_functions.h>
+
 #include <thrust/complex.h>
 
 #include "../fast-fourier.h"
@@ -16,6 +18,7 @@ int main()
 
 	cfloat*	d_input(nullptr);
 	cfloat*	d_actual(nullptr);
+	bool*	b_s(nullptr);
 	cfloat	actual[n];
 
 	// Allocate an input and output array on the GPU
@@ -35,6 +38,14 @@ int main()
 			<< cudaGetErrorString(t) << endl;
 		return 1;
 	}
+	if (cudaMalloc( &b_s, sizeof(bool) * ilogbf(n) * num_blk * num_thd ) != cudaSuccess)
+	{
+		auto t = cudaGetLastError();
+		cout << "Failed to allocate boolean storage: "
+			<< cudaGetErrorName(t) << ", "
+			<< cudaGetErrorString(t) << endl;
+		return 1;
+	}
 	// Copy the input array to the GPU
 	if (cudaMemcpy( d_input, input, sizeof(cfloat) * n, cudaMemcpyHostToDevice ) != cudaSuccess)
 	{
@@ -45,7 +56,7 @@ int main()
 		return 1;
 	}
 
-	fast_fourier_transform<<<1,1>>>(d_input, d_actual, n, num_blk, num_thd);
+	fast_fourier_transform<<<1,1>>>(d_input, d_actual, n, num_blk, num_thd, b_s);
 
 	// Copy the output array from the GPU
 	if (cudaMemcpy( actual, d_actual, sizeof(cfloat) * n, cudaMemcpyDeviceToHost ) != cudaSuccess)

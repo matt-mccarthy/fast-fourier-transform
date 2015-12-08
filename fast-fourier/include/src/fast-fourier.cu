@@ -25,7 +25,7 @@ cfloat	k_root_unity(int k, int n);
 
 __global__
 void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
-					unsigned thd_off, unsigned n, int m);
+					unsigned thd_off, unsigned n, int m, bool* binary_stor, int thd_count);
 __global__
 void parallel_copy(const cfloat* src, cfloat* dst, unsigned n, unsigned blk_off,
 					unsigned thd_off);
@@ -43,18 +43,16 @@ cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 	return y;
 }
 
-void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
+void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
+											bool* binary_stor)
 {
-	cfloat*	s(y);
-	cfloat*	r(x);
+	cfloat*	s(x);
+	cfloat*	r(y);
 	cfloat*	tmp_ptr;
 	int		lg_n(ilogbf(n));
 	int		j,k,u_exp;
-	bool*	l_bi(new bool[lg_n]);
+	bool*	l_bi(binary_stor);
 	bool	tmp(false);
-
-	// for (int j(0) ; j < n ; j++)
-	// 	r[j] = x[j];
 
 	for (int j(0) ; j < lg_n ; j++ )
 		l_bi[j] = false;
@@ -82,28 +80,23 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 		}
 	}
 
-	// for (int j(0) ; j < n ; j++)
-	// 	y[j] = r[j];
-
-	delete[] l_bi;
+	for (int j(0) ; j < n ; j++)
+		y[j] = r[j];
 }
 
 __global__
 void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
-											int blk_count, int thd_count)
+											int blk_count, int thd_count, bool* binary_stor)
 {
 	int		lg_n(ilogbf(n));
 
 	int		blk_off = n / blk_count;
 	int		thd_off	= blk_off / thd_count;
 
-	cfloat* r(x);
-	cfloat* s(y);
+	// cfloat* r(new cfloat[n]);
+	// cfloat* s(new cfloat[n]);
+	cfloat *r(x), *s(y);
 	cfloat*	tmp_ptr;
-
-	// Copy x into r
-	// parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
-	// cudaDeviceSynchronize();
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
@@ -113,26 +106,27 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 		s		= tmp_ptr;
 
 		// Perform the next step of the transform
-		transformer<<<blk_count, thd_count>>>(r, s, lg_n, blk_off, thd_off, n, m);
+		transformer<<<blk_count, thd_count>>>(r, s, lg_n, blk_off, thd_off, n, m, binary_stor, thd_count);
 		cudaDeviceSynchronize();
 	}
 
 	// Copy r into y
-	// parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
-	// cudaDeviceSynchronize();
+	parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
+	cudaDeviceSynchronize();
 
 	// delete[] r, s;
 }
 
 __global__
 void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
-					unsigned thd_off, unsigned n, int m)
+					unsigned thd_off, unsigned n, int m, bool* binary_stor, int thd_count)
 {
 	int		l_min( blockIdx.x * blk_off + threadIdx.x * thd_off );
 	int		l_max( l_min + thd_off );
 	int		j, k, u_exp;
 
-	bool*	l_bi(new bool[lg_n]);
+	// bool*	l_bi(new bool[lg_n]);
+	bool*	l_bi(binary_stor + (blockIdx.x * thd_count + threadIdx.x) * lg_n);
 	bool	tmp;
 
 	dec2bin(l_bi, l_min, lg_n);
@@ -152,7 +146,7 @@ void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
 		binary_inc(l_bi, lg_n);
 	}
 
-	delete[] l_bi;
+	// delete[] l_bi;
 }
 
 __global__

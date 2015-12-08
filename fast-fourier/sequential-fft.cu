@@ -7,6 +7,8 @@
 #include <iostream>
 #include <utility>
 
+#include <math_functions.h>
+
 #include "include/fast-fourier.h"
 
 using namespace std;
@@ -18,9 +20,9 @@ long double	sum(long double* in, int n);
 long double	std_dev(long double* in, int n, long double sum);
 
 __global__
-void run_test(cfloat* input, cfloat* output, int n)
+void run_test(cfloat* input, cfloat* output, int n, bool* binary_stor)
 {
-	fast_fourier_transform(input, output, n);
+	fast_fourier_transform(input, output, n, binary_stor);
 }
 
 int main(int argc, char** argv)
@@ -35,14 +37,16 @@ int main(int argc, char** argv)
 	int		trial_count(atoi(argv[2]));
 
 	cfloat*	input(new cfloat[n]);
+	cfloat* output(new cfloat[n]);
 	cfloat* d_input(nullptr);
 	cfloat* d_output(nullptr);
+	bool*	binary_stor(nullptr);
 
 	long double	times[trial_count];
 	high_resolution_clock::time_point tp2, tp1;
 	duration<long double> time_span;
 
-	// Allocate two device arrays
+	// Allocate device arrays
 	if (cudaMalloc( &d_input, sizeof(cfloat) * n ) != cudaSuccess)
 	{
 		auto t = cudaGetLastError();
@@ -59,6 +63,14 @@ int main(int argc, char** argv)
 			<< cudaGetErrorString(t) << endl;
 		return 1;
 	}
+	if (cudaMalloc( &binary_stor, sizeof(bool) * ilogbf(n) ) != cudaSuccess)
+	{
+		auto t = cudaGetLastError();
+		cout << "Failed to allocate boolean storage: "
+			<< cudaGetErrorName(t) << ", "
+			<< cudaGetErrorString(t) << endl;
+		return 1;
+	}
 
 	// Run experiment
 	for (int j(0) ; j < trial_count ; j++)
@@ -66,6 +78,8 @@ int main(int argc, char** argv)
 		// Generate random input
 		gen_array(input, n);
 
+		// Run the test
+		tp1 = system_clock::now();
 		// Copy the input array to the GPU
 		if (cudaMemcpy( d_input, input, (long) n * sizeof(cfloat), cudaMemcpyHostToDevice ) != cudaSuccess)
 		{
@@ -76,26 +90,20 @@ int main(int argc, char** argv)
 				<< cudaGetErrorString(t) << endl;
 			return 1;
 		}
-
-		// Run the test
-		tp1 = system_clock::now();
-		run_test<<<1,1>>>(d_input, d_output, n);
-		cudaDeviceSynchronize();
-		tp2 = system_clock::now();
-
-		auto t = cudaGetLastError();
-		if ( t != cudaSuccess )
+		run_test<<<1,1>>>(d_input, d_output, n, binary_stor);
+		if (cudaMemcpy( output, d_output, (long) n * sizeof(cfloat), cudaMemcpyDeviceToHost ) != cudaSuccess)
 		{
+			auto t = cudaGetLastError();
 			cout << "Iteration: " << j
-			<< " Run failed: "
-			<< cudaGetErrorName(t) << ", "
-			<< cudaGetErrorString(t) << endl;
+				<< " Output failed to copy: "
+				<< cudaGetErrorName(t) << ", "
+				<< cudaGetErrorString(t) << endl;
 			return 1;
 		}
+		tp2 = system_clock::now();
 
 		time_span	= duration_cast< duration<long double> >(tp2 - tp1)*1000.0;
 		times[j]	= time_span.count();
-		cout << j << endl;
 	}
 
 	// Calculate statistics
@@ -105,6 +113,7 @@ int main(int argc, char** argv)
 
 	cout << av << "\t" << sd << endl;
 
+	cudaFree( binary_stor );
 	cudaFree( d_input );
 	cudaFree( d_output );
 	return 0;
