@@ -45,16 +45,16 @@ cfloat* fast_fourier::discrete_fourier_transform(cfloat* x,	unsigned n)
 
 void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 {
-	cfloat*	s(new cfloat[n]);
-	cfloat*	r(new cfloat[n]);
+	cfloat*	s(y);
+	cfloat*	r(x);
 	cfloat*	tmp_ptr;
 	int		lg_n(ilogbf(n));
 	int		j,k,u_exp;
 	bool*	l_bi(new bool[lg_n]);
 	bool	tmp(false);
 
-	for (int j(0) ; j < n ; j++)
-		r[j] = x[j];
+	// for (int j(0) ; j < n ; j++)
+	// 	r[j] = x[j];
 
 	for (int j(0) ; j < lg_n ; j++ )
 		l_bi[j] = false;
@@ -82,10 +82,10 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n)
 		}
 	}
 
-	for (int j(0) ; j < n ; j++)
-		y[j] = r[j];
+	// for (int j(0) ; j < n ; j++)
+	// 	y[j] = r[j];
 
-	delete[] r, s, l_bi;
+	delete[] l_bi;
 }
 
 __global__
@@ -97,13 +97,13 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	int		blk_off = n / blk_count;
 	int		thd_off	= blk_off / thd_count;
 
-	cfloat* r(new cfloat[n]);
-	cfloat* s(new cfloat[n]);
+	cfloat* r(x);
+	cfloat* s(y);
 	cfloat*	tmp_ptr;
 
 	// Copy x into r
-	parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
-	cudaDeviceSynchronize();
+	// parallel_copy<<<blk_count, thd_count>>>(x, r, n, blk_off, thd_off);
+	// cudaDeviceSynchronize();
 
 	for (int m(0) ; m < lg_n ; m++)
 	{
@@ -118,10 +118,10 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	}
 
 	// Copy r into y
-	parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
-	cudaDeviceSynchronize();
+	// parallel_copy<<<blk_count, thd_count>>>(r, y, n, blk_off, thd_off);
+	// cudaDeviceSynchronize();
 
-	delete[] r, s;
+	// delete[] r, s;
 }
 
 __global__

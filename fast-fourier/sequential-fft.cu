@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	int		n(atoi(argv[1]));
 	int		trial_count(atoi(argv[2]));
 
-	cfloat	input[n];
+	cfloat*	input(new cfloat[n]);
 	cfloat* d_input(nullptr);
 	cfloat* d_output(nullptr);
 
@@ -83,8 +83,19 @@ int main(int argc, char** argv)
 		cudaDeviceSynchronize();
 		tp2 = system_clock::now();
 
+		auto t = cudaGetLastError();
+		if ( t != cudaSuccess )
+		{
+			cout << "Iteration: " << j
+			<< " Run failed: "
+			<< cudaGetErrorName(t) << ", "
+			<< cudaGetErrorString(t) << endl;
+			return 1;
+		}
+
 		time_span	= duration_cast< duration<long double> >(tp2 - tp1)*1000.0;
 		times[j]	= time_span.count();
+		cout << j << endl;
 	}
 
 	// Calculate statistics
@@ -104,7 +115,7 @@ void gen_array(cfloat* output, int n)
 	srand(time(nullptr));
 
 	for (int j = 0; j < n; j++)
-         output[j] = cfloat(rand(), rand());
+		output[j] = cfloat(rand(), rand());
 }
 
 long double	sum(long double* in, int n)
