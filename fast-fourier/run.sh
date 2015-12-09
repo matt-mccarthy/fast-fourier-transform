@@ -1,6 +1,7 @@
 out_dir="results"
 trials=1000
 # Must be powers of two.
+# I go from 32K (4096 float2's) to 8M (1048576 float2's)
 arr_size=(4096 8192 16384 32768 65536 131072 262144 524288 1048576)
 # Must also be powers of two. I pass this twice since I use num_blks=num_thds.
 num_thds=(2 4 8 16 32)
