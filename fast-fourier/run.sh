@@ -1,7 +1,6 @@
 out_dir="results"
-trials=10
-#arr_size=(4096 8192 16384 32768 65536 131072)
-arr_size=(1024 2048)
+trials=1000
+arr_size=(4096 8192 16384 32768 65536 131072 262144 524288 1048576)
 num_thds=(2 4 8 16 32)
 
 seq_file="./sequential-fft"
