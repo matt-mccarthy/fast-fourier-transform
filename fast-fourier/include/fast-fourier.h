@@ -8,9 +8,9 @@ namespace fast_fourier
 	typedef thrust::complex<float> cfloat;
 
 	__host__ __device__
-	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n);
+	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, bool* binary_stor);
 	__global__
-	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, int blk_count, int thd_count);
+	void fast_fourier_transform(cfloat* x, cfloat* y, unsigned n, int blk_count, int thd_count, bool* binary_stor);
 	__host__ __device__
 	cfloat* discrete_fourier_transform(cfloat* x, unsigned n);
 }
