@@ -171,6 +171,8 @@ To avoid this issue entirely, we made all allocations of giant arrays occur in m
 As a note, the \verb|binary_stor| array is where we store the binary representation of our index $l$ for each thread.
 While this design is suboptimal (ideally, each thread would create its own so others can not touch it), it works and the performance impact should be neglible for large enough $n$.
 
+For our experiment, we let $\mathcal{N}=\set{2^{12},2^{13},\ldots,2^{18}}$ and $\mathcal{T}=\set{1,4,16,64,256,1024}$.
+
 \section{Results}
 
 \subsection{Linear Speedup}
