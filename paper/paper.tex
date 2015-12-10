@@ -135,7 +135,7 @@ If we inspect the parallelization, we see that the outer loop runs $\lg n$ times
 However, the inner loop is ran on $p$ processes, each of which handle $n/p$ iterations.
 Therefore, the computation cost is $\Theta(n/p\lg n)$.
 Moreover, for communication we simply do two reads from VRAM on each iteration of the inner loop, however some values will be in cache so we may get better performance than that.
-Ergo, the communication cost $O(n/p\lg n)$.
+Ergo, the communication cost is $O(n/p\lg n)$.
 Thus, the parallel runtime will be $T_p = O(n/p \lg n)$ and is cost optimal if and only if $p\leq n$.
 
 \section{Experimental Design}
@@ -162,8 +162,14 @@ The computer was running Arch Linux on Linux kernel 4.2.5 with Nvidia driver ver
 Firstly, all code can be located at \url{https://github.com/matt-mccarthy/fast-fourier-transform} in the \verb|fast-fourier| folder.
 We also include a version of the code in the Appendix.
 
-All code was compiled with CUDA toolkit 7.5 and GCC 5.2.0 with the command \verb|nvcc| \verb| -std=c++11| \verb|-rdc=true| \verb|-arch=compute_52| \verb|-code=sm_52 -O3|.
+All code was compiled with the CUDA toolkit 7.5 and GCC 5.2.0 with the command \verb|nvcc| \verb| -std=c++11| \verb|-rdc=true| \verb|-arch=compute_52| \verb|-code=sm_52 -O3|.
 The library source file is \verb|src/fast-fourier.cu|, and the sequential and parallel main functions are located in \verb|sequential-fft.cu| and \verb|parallel-fft.cu| respectively.
+
+In both the sequential fast Fourier and parallel fast Fourier, we ran into issues with dynamically allocating memory in a CUDA kernel.
+Namely, if we allocated and freed often enough, we ran out of memory.
+To avoid this issue entirely, we made all allocations of giant arrays occur in main once and then reused those arrays.
+As a note, the \verb|binary_stor| array is where we store the binary representation of our index $l$ for each thread.
+While this design is suboptimal (ideally, each thread would create its own so others can not touch it), it works and the performance impact should be neglible for large enough $n$.
 
 \section{Results}
 
