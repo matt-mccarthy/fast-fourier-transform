@@ -8,6 +8,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
 
 \def\ft{\mathcal{F}}
 \algblockdefx[spawn]{Spawn}{EndSpawn}
@@ -172,6 +173,13 @@ As a note, the \verb|binary_stor| array is where we store the binary representat
 While this design is suboptimal (ideally, each thread would create its own so others can not touch it), it works and the performance impact should be neglible for large enough $n$.
 
 \section{Results}
+
+\begin{figure}[h!]\label{results}
+	\centering
+
+	\includegraphics[scale=0.5]{results.png}
+	\caption{Runtime vs Array Size}
+\end{figure}
 
 \subsection{Linear Speedup}
 
