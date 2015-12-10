@@ -78,7 +78,54 @@ If we iterate this process, we get the following algorithm called the one-dimens
 
 \subsubsection{Cooley Tukey}
 
+Furthermore, we have an iterative formulation of the prior algorithm, called the Cooley Tukey algorithm for one-dimensional, unordered radix 2, fast Fourier transforms.
+
+\begin{algorithmic}[1]
+	\Function{I-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+		\State $t:=\lg n$
+		\State $\mathbf{R}=\mathbf{X}$
+		\For{$m=0$ to $t-1$}
+			\State $\mathbf{S}=\mathbf{R}$
+			\For{$l=0$ to $n-1$}
+				\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $l$
+				\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+				\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+				\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+			\EndFor
+		\EndFor
+		\State $\mathbf{Y}:=\mathbf{R}$
+	\EndFunction
+\end{algorithmic}
+
 \subsection{Parallelization}
+
+For our parallelization, we use a simplified version of the binary exchange algorithm, a parallelization of the Cooley Tukey algorithm designed for use on a hypercube.
+Since our implementation runs on a single GPU, any thread can access any memory location via a pointer.
+However, this also complicates the matter by introducing a potential for data races.
+We solve this by modifying the algorithm to work as follows.
+
+\begin{algorithmic}[1]
+	\Function{PAR-FFT}{$\mathbf{X}$,$\mathbf{Y}$,$n$}
+		\State $t:=\lg n$, $BLK:=n/p$
+		\State $\mathbf{R}=\mathbf{X}$
+		\State $\mathbf{S}=\mathbf{0}$
+		\For{$m=0$ to $t-1$}
+			\State Swap pointers $\mathbf{R}$ and $\mathbf{S}$
+			\Spawn{$l=0$ to $BLK-1$}
+				\For{$c=l\cdot BLK$, to $l\cdot(BLK+1)$}
+					\State Let $(b_0b_1\ldots b_{t-1})$ be the binary expansion of $c$
+					\State $j:=(b_0\ldots b_{m-1}0b_{m+1}\ldots b_{t-1})$
+					\State $k:=(b_0\ldots b_{m-1}1b_{m+1}\ldots b_{t-1})$
+					\State $r_i:= s_j+s_k\omega^{(b_mb_{m-1}\ldots b_0 0\ldots0)}$
+				\EndFor
+			\EndSpawn
+			\State \textbf{sync}
+		\EndFor
+		\State $\mathbf{Y}:=\mathbf{R}$
+	\EndFunction
+\end{algorithmic}
+In each iteration, we only write to $\mathbf{R}$ and only read from $\mathbf{S}$.
+Since we wait until each thread is complete before moving on to the next iteration, we avoid the potential to use old or incorrect data.
 
 \section{Experimental Design}
 
