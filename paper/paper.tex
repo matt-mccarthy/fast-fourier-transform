@@ -97,6 +97,10 @@ Furthermore, we have an iterative formulation of the prior algorithm, called the
 	\EndFunction
 \end{algorithmic}
 
+From this pseudo-code, we can determine the complexity of fast Fourier transform.
+We begin by noting that we iterate through the outer loop precisely $\lg n$ times and the inner loop $n$ times.
+Therefore our complexity is $T_1=\Theta(n\lg n)$.
+
 \subsection{Parallelization}
 
 For our parallelization, we use a simplified version of the binary exchange algorithm, a parallelization of the Cooley Tukey algorithm designed for use on a hypercube.
@@ -127,13 +131,39 @@ We solve this by modifying the algorithm to work as follows.
 In each iteration, we only write to $\mathbf{R}$ and only read from $\mathbf{S}$.
 Since we wait until each thread is complete before moving on to the next iteration, we avoid the potential to use old or incorrect data.
 
+If we inspect the parallelization, we see that the outer loop runs $\lg n$ times.
+However, the inner loop is ran on $p$ processes, each of which handle $n/p$ iterations.
+Therefore, the computation cost is $\Theta(n/p\lg n)$.
+Moreover, for communication we simply do two reads from VRAM on each iteration of the inner loop, however some values will be in cache so we may get better performance than that.
+Ergo, the communication cost $O(n/p\lg n)$.
+Thus, the parallel runtime will be $T_p = O(n/p \lg n)$ and is cost optimal if and only if $p\leq n$.
+
 \section{Experimental Design}
+
+The goal of the experiment is to empirically determine the effect of parallelization on the runtime of the Cooley Tukey algorithm.
+To this end we want to measure the runtime of fast Fourier transform using differing sizes of $n$, the dimension of our Complex valued vector, and $t$, the number of threads.
+Let $\mathcal{N}$ be the set of vector dimensions we will test and let $\mathcal{T}$ be the set of thread counts we will test.
+Furthermore, we specify that each $n\in\mathcal{N}$ and each $t\in\mathcal{T}$ be powers of two.
+
+For $t=1$, we will run the Cooley Tukey algorithm on random Complex valued vectors of dimension $n$ for each $n\in\mathcal{N}$.
+Otherwise, we run our parallelization of the Cooley Tukey algorithm on Complex valued vectors of dimension $n$ for each $n\in\mathcal{N}$.
+Moreover, before and after each run, we copy the input to the GPU and the output from the GPU.
+We do not check the output for correctness during the test in order to save time, but instead checked the correctness of the algorithm beforehand.
 
 \section{Test Environment}
 
 \subsection{Test System}
 
+The machine used to run the test has an Intel i7 4770k running at 4.2GHz, 16GB of RAM, and a Nvidia GTX 970 with a core clock of 1342MHz and memory clock of 7000MHz.
+The computer was running Arch Linux on Linux kernel 4.2.5 with Nvidia driver version 358.16 and CUDA 7.5.
+
 \subsection{Test Program}
+
+Firstly, all code can be located at \url{https://github.com/matt-mccarthy/fast-fourier-transform} in the \verb|fast-fourier| folder.
+We also include a version of the code in the Appendix.
+
+All code was compiled with CUDA toolkit 7.5 and GCC 5.2.0 with the command \verb|nvcc| \verb| -std=c++11| \verb|-rdc=true| \verb|-arch=compute_52| \verb|-code=sm_52 -O3|.
+The library source file is \verb|src/fast-fourier.cu|, and the sequential and parallel main functions are located in \verb|sequential-fft.cu| and \verb|parallel-fft.cu| respectively.
 
 \section{Results}
 
