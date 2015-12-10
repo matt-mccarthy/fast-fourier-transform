@@ -14,8 +14,8 @@ using namespace chrono;
 using namespace fast_fourier;
 
 void	gen_array(cfloat* output, int n);
-long double	sum(long double* in, int n);
-long double	std_dev(long double* in, int n, long double sum);
+long double	average(long double* in, int n);
+long double	std_dev(long double* in, int n, long double average);
 
 int main(int argc, char** argv)
 {
@@ -96,14 +96,13 @@ int main(int argc, char** argv)
 		}
 		tp2 = system_clock::now();
 
-		time_span	= duration_cast< duration<long double> >(tp2 - tp1)*1000.0;
+		time_span	= duration_cast< duration<long double, ratio<1,1000> > >(tp2 - tp1);
 		times[j]	= time_span.count();
 	}
 
 	// Calculate statistics
-	long double av(sum(times, trial_count));
+	long double av(average(times, trial_count));
 	long double sd(std_dev(times, trial_count, av));
-	av /= (long double)n;
 
 	cout << av << "\t" << sd << endl;
 
@@ -121,28 +120,28 @@ void gen_array(cfloat* output, int n)
          output[j] = cfloat(rand(), rand());
 }
 
-long double	sum(long double* in, int n)
+long double	average(long double* in, int n)
 {
 	long double s(0.0);
 
 	for (int j(0) ; j < n ; j++)
 		s += in[j];
 
-	return s;
+	return s/n;
 }
 
-long double	std_dev(long double* in, int n, long double sum)
+long double	std_dev(long double* in, int n, long double average)
 {
 	long double var = 0;
 	long double tmp = 0;
 
 	for (int i = 0 ; i < n ; i++)
 	{
-		tmp = (n * in[i] - sum);
+		tmp = (in[i] - average);
 		var += tmp * tmp;
 	}
 
-	long double stdDev = sqrt(var/n) / n;
+	long double stdDev = sqrt(var/n);
 
 	return stdDev;
 }
