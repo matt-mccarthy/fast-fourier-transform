@@ -1,8 +1,8 @@
 out_dir="results"
 trials=10
 # Must be powers of two.
-# I go from 32K (4096 float2's) to 2M (262144 float2's)
-arr_size=(4096 8192 16384 32768 65536 131072 262144)
+# I go from 1M (131072 float2's) to 1G (134217728 float2's)
+arr_size=(131072 524288 2097152 8388608 33554432 134217728)
 # Must also be powers of two. I pass this twice since I use num_blks=num_thds.
 num_thds=(2 4 8 16 32)
 # The names of the executables

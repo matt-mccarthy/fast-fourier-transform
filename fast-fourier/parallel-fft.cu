@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
 	long double	times[trial_count];
 	high_resolution_clock::time_point tp2, tp1;
-	duration<long double> time_span;
+	duration<long double, ratio<1,1000> > time_span;
 
 	// Allocate device arrays
 	if (cudaMalloc( &d_input, sizeof(cfloat) * n ) != cudaSuccess)
