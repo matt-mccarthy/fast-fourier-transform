@@ -12,20 +12,52 @@ using thrust::fill_n;
 
 using fast_fourier::cfloat;
 
+/// Increments a number represented in binary.
+/// @param i Our binary representation.
+/// @param lg_n The size of the bool vector (it had better be lg n!).
 __host__ __device__
 void	binary_inc(bool* i, int lg_n);
+/// Converts a binary representaion to an integer.
+/// @param i Our binary representation.
+/// @param lg_n The size of the bool vector (it had better be lg n!).
+/// @return The decimal value
 __host__ __device__
 int		bin2dec(const bool* i, int lg_n);
+/// Writes a binary representation to a bit vector.
+/// @param i Our binary representation.
+/// @param l The int to convert.
+/// @param lg_n The size of the bool vector (it had better be lg n!).
 __host__ __device__
 void	dec2bin(bool* i, int l, int lg_n);
+/// Our wierd binary exponent.
+/// @param l Our binary representation.
+/// @param lg_n The size of the bool vector (it had better be lg n!).
+/// @param m The current iteration.
 __host__ __device__
 int		wierd_bin_thingy(const bool* l, int lg_n, int m);
+/// Returns the nth root of unity raised to the k
 __host__ __device__
 cfloat	k_root_unity(int k, int n);
 
+/// The inner loop of FFT
+/// @param r The vector to which we write.
+/// @param s The vector from which we read.
+/// @param lg_n lg n.
+/// @param blk_off The block offset (used for reading from binary_stor).
+/// @param thd_off The thread offset (used for reading from binary_stor).
+/// @param n The size of our I/O vectors.
+/// @param m The current iteration.
+/// @param binary_stor our bit vector where we store binary representations.
+/// @param thd_count The number of threads per block.
 __global__
 void transformer(cfloat* r, cfloat* s, unsigned lg_n, unsigned blk_off,
 					unsigned thd_off, unsigned n, int m, bool* binary_stor, int thd_count);
+/// A parallel copy algorithm.
+/// @param src The source.
+/// @param dst The destination.
+/// @param n The size of the vectors.
+/// @param blk_off The number of things each block gets.
+/// @param thd_off The number of things each thread gets.
 __global__
 void parallel_copy(const cfloat* src, cfloat* dst, unsigned n, unsigned blk_off,
 					unsigned thd_off);
@@ -93,8 +125,6 @@ void fast_fourier::fast_fourier_transform(cfloat* x, cfloat* y, unsigned n,
 	int		blk_off = n / blk_count;
 	int		thd_off	= blk_off / thd_count;
 
-	// cfloat* r(new cfloat[n]);
-	// cfloat* s(new cfloat[n]);
 	cfloat *r(x), *s(y);
 	cfloat*	tmp_ptr;
 
