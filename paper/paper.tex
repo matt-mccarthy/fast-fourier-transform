@@ -173,44 +173,46 @@ To avoid this issue entirely, we made all allocations of giant arrays occur in m
 As a note, the \verb|binary_stor| array is where we store the binary representation of our index $l$ for each thread.
 While this design is suboptimal (ideally, each thread would create its own so others can not touch it), it works and the performance impact should be neglible for large enough $n$.
 
-For our test we took, $\mathcal{N}=\set{2^{17},2^{19},2^{21},2^{23},2^{25},2^{27}}$ and $\mathcal{T}=\set{1,4,16,64,256,1024}$, all of which are less than the number of cores on our GTX 970.
+For our test we took, $\mathcal{N}=\set{2^{17},2^{19},2^{21},2^{23},2^{25}}$ and $\mathcal{T}=\set{1,4,16,64,256,1024}$, all of which are less than the number of cores on our GTX 970.
 We chose $\mathcal{N}$ such that we would get a runtime for 1MB of data on the low end, and 1GB of data on the high end since each complex value is a typedef'd \verb|float2|.
 Moreover, we ran each combination of $n$ and $t$ 10 times each.
 
 \section{Results}
 
-\begin{figure}[h!]\label{results}
+\begin{figure}\label{results}
 	\centering
 
 	\includegraphics[scale=0.5]{results.png}
 	\caption{Runtime vs Array Size}
 \end{figure}
 
-\begin{figure}[h!]\label{res-table}
+\begin{figure}\label{res-table}
 	\centering
 	\begin{small}
 	\[
-		\begin{array}{r|c|c|c|c|c|c|c}
-			& 2^{12} & 2^{13} & 2^{14} & 2^{15} & 2^{16} & 2^{17} & 2^{18}\\\hline
-			2^0& 32.02 & 37.86 & 41.27 & 47.92 & 49.06 & 56.29 & 60.42\\\hline
-			2^2& 7.73 & 9.01 & 9.82 & 11.31  & 11.65 & 13.31 & 14.35\\\hline
-			2^4& 2.05 & 2.33 & 2.51 & 2.88 & 2.96 & 3.38 & 3.64\\\hline
-			2^6& 0.56 & 0.65 & 0.67 & 0.75 & 0.76 & 0.87 & 0.93\\\hline
-			2^8& 0.20 & 0.19 & 0.20 & 0.21 & 0.21 & 0.24 & 0.25\\\hline
-			2^{10}& 0.11 & 0.08 & 0.07 & 0.07 & 0.07 & 0.07 & 0.08
+		\begin{array}{r|c|c|c|c|c}
+			& 2^{17} & 2^{19} & 2^{21} & 2^{23} & 2^{25}\\\hline
+			2^0& 7.37 & 35.8 & 162 & 773 & 3.42\cdot10^6\\\hline
+			2^2& 1.75 & 8.47 & 38.5 & 183  & 813\\\hline
+			2^4& .446 & 2.15 & 9.75 & 46.4 & 205.8\\\hline
+			2^6& .117 & .552 & 2.51 & 11.9 & 52.8\\\hline
+			2^8& .034 & .149 & .669 & 3.14 & 14.3\\\hline
+			2^{10}& 0.011 & .046 & .201 & .975 & 4.65
 		\end{array}
 	\]
 	\end{small}
-	\caption{The table of runtimes generated at $(n,t)$ in ms}
+	\caption{The table of runtimes generated at $(n,t)$ in s}
 \end{figure}
 
-\autoref{res-table} lists the runtimes for each $t$ (row index) at size $n$ (column index).
-Note, however that for $t\geq 2^8$, our standard deviation sometimes exceeded the average, although, our standard deviations up to $t=2^6$ were small enough for us to gain some data.
+Figure 2 lists the runtimes for each $t$ (row index) at size $n$ (column index).
+Moreover, the graphs all look like the standard $x\ln x$ curve.
+By inspection, we see that $T_{2k}\approx T_{2k+2}/4$, which is exactly what we are looking for.
+So naively, we can say that this has a linear speedup.
 
-\subsection{Linear Speedup}
-
-By inspection, we see that $T_{2k}\approx T_{2k+2}/4$, which is exactly what we are looking for. So naively, we can say that this has a linear speedup.
-We attempted to find statistical evidence for this by showing that the
+We also attempted to compute on 1GB of random complex numbers, or precisely, $2^{27}$ complex numbers.
+The parallel runtime for $t=1024$ was approximately 22s, however, after many hours of running the sequential version at this $n$ did not complete.
+Upon deeper analysis, we learned that with perfect linear speedup, the sequential version would have a runtime roughly 1000 times greater than $T_{1024}$, namely 6 hours.
+Due to time constraints, we had to abandon this size of $n$ and make our maximum $2^{25}$.
 
 \section{Conclusion}
 
