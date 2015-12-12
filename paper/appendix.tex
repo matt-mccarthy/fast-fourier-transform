@@ -1,0 +1,53 @@
+\documentclass[notitlepage]{article}
+\usepackage{fullpage}
+\usepackage{minted}
+
+\begin{document}
+\section*{Appendix A: Code}
+
+\verb|run.sh|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{../fast-fourier/run.sh}
+
+\pagebreak
+
+\verb|sequential-fft.cu|
+\inputminted[tabsize=4, fontsize=\scriptsize]{cu}{../fast-fourier/sequential-fft.cu}
+
+\pagebreak
+
+\verb|parallel-fft.cu|
+\inputminted[tabsize=4, fontsize=\scriptsize]{cu}{../fast-fourier/parallel-fft.cu}
+
+\pagebreak
+
+\verb|include/fast-fourier.h|
+\inputminted[tabsize=4, fontsize=\scriptsize]{cu}{../fast-fourier/include/fast-fourier.h}
+
+\pagebreak
+
+\verb|include/src/fast-fourier.cu|
+\inputminted[tabsize=4, fontsize=\scriptsize]{cu}{../fast-fourier/include/src/fast-fourier.cu}
+
+\pagebreak
+
+\section*{Appendix B: Results}
+
+\verb|1.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/1.txt}
+
+\noindent\verb|4.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/4.txt}
+
+\noindent\verb|16.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/16.txt}
+
+\noindent\verb|64.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/64.txt}
+
+\noindent\verb|256.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/256.txt}
+
+\noindent\verb|1024.txt|
+\inputminted[tabsize=4, fontsize=\scriptsize]{sh}{results/1024.txt}
+
+\end{document}
